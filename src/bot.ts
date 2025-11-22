@@ -9,7 +9,7 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-// ?? —: обавл€ем простой веб-сервер дл€ Render
+// еб-сервер дл€ Render
 const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Bot is running');
@@ -29,16 +29,26 @@ bot.on('text', async (ctx) => {
   
   try {
     await ctx.sendChatAction('typing');
+    console.log(`Processing message: ${ctx.message.text}`);
+    
     const result = await model.generateContent(ctx.message.text);
+    console.log('Gemini response received');
+    
     const response = await result.response;
-    let text = response.text();
+    const text = response.text();
+    console.log(`Response length: ${text.length} chars`);
     
     if (text.length > 4000) {
-      text = text.substring(0, 4000) + '\n\n... (message shortened)';
+      await ctx.reply(text.substring(0, 4000) + '\n\n... (message shortened)');
+    } else {
+      await ctx.reply(text);
     }
     
-    await ctx.reply(text);
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Full error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    
     await ctx.reply('?? Error, please try again later');
   }
 });
@@ -47,7 +57,6 @@ bot.launch().then(() => {
   console.log('? Bot started successfully');
 });
 
-// Graceful shutdown
 process.once('SIGINT', () => {
   bot.stop('SIGINT');
   server.close();
