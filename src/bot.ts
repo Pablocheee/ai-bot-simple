@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
 bot.start(async (ctx) => {
-  await ctx.reply("?? Бесплатный ИИ-помощник с Gemini 2.0 Flash\n\nПросто задайте вопрос!");
+  await ctx.reply("?? AI Assistant with Gemini 2.0 Flash\n\nJust ask your question!");
 });
 
 bot.on('text', async (ctx) => {
@@ -21,14 +21,14 @@ bot.on('text', async (ctx) => {
     const response = await result.response;
     let text = response.text();
     
-    // Просто ограничиваем длинные сообщения
+    // Limit long messages
     if (text.length > 4000) {
-      text = text.substring(0, 4000) + '\n\n... (сообщение сокращено)';
+      text = text.substring(0, 4000) + '\n\n... (message shortened)';
     }
     
     await ctx.reply(text);
   } catch (error) {
-    await ctx.reply('?? Ошибка, попробуйте позже');
+    await ctx.reply('?? Error, please try again later');
   }
 });
 
