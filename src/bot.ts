@@ -9,7 +9,7 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-// еб-сервер для Render
+// Веб-сервер для Render
 const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Bot is running');
@@ -29,14 +29,14 @@ bot.on('text', async (ctx) => {
   
   try {
     await ctx.sendChatAction('typing');
-    console.log(`Processing message: ${ctx.message.text}`);
+    console.log('?? Sending request to Gemini...');
     
     const result = await model.generateContent(ctx.message.text);
-    console.log('Gemini response received');
+    console.log('? Gemini response received');
     
     const response = await result.response;
     const text = response.text();
-    console.log(`Response length: ${text.length} chars`);
+    console.log(`?? Response length: ${text.length} chars`);
     
     if (text.length > 4000) {
       await ctx.reply(text.substring(0, 4000) + '\n\n... (message shortened)');
@@ -45,11 +45,13 @@ bot.on('text', async (ctx) => {
     }
     
   } catch (error: any) {
-    console.error('Full error details:', error);
-    console.error('Error message:', error.message);
-    console.error('Error code:', error.code);
+    console.error('? GEMINI API ERROR:');
+    console.error('Message:', error.message);
+    console.error('Status:', error.status);
+    console.error('Status Text:', error.statusText);
+    console.error('Full error:', JSON.stringify(error, null, 2));
     
-    await ctx.reply('?? Error, please try again later');
+    await ctx.reply('?? Gemini API error. Please try again later.');
   }
 });
 
